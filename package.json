@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "bigchaindb-driver": "^4.3.0",
+    "kafkajs": "^2.2.3"
+  },
+  "name": "iot-bc",
+  "description": "<b> UNICAM - University of Camerino.  Computer Science, course <i> Technologies for Big Data and Management.</i> Year 2022/2023. </b>",
+  "version": "1.0.0",
+  "main": "Consumer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acata8/TDBM-IOT-BC.git"
+  },
+  "author": "acata8, paolocampanelli",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/acata8/TDBM-IOT-BC/issues"
+  },
+  "homepage": "https://github.com/acata8/TDBM-IOT-BC#readme"
+}
