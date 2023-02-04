@@ -3,9 +3,14 @@ const config = require('../config/dev');
 
 const API_PATH = `http://${config.bigchaindb.apiPath}`;
 
-const connection = new driver.Connection(API_PATH);
 
 class IotDevice {
+
+    constructor(){
+        this.connection = new driver.Connection(API_PATH);
+    }
+
+
 
     /**
      * Method used to create a new asset inside BigchainDB
@@ -19,82 +24,71 @@ class IotDevice {
      */
     createAsset(type, um, value, dt, publicKey, privateKey) {
     
-        return new Promise((resolve, reject) => {
-            
-            const assetdata = {
-                'iot_device': {
-                    'type': type
-                }
-            }
-            
-            if(!um)
-                um = 'ND'
+        const assetdata = {
+            iot_device : type
+        }
 
-            const metadata = {
-                'value': value,
-                'timestamp': dt,
-                'unit_measure': um
-            }
+        const metadata = {
+            timestamp: dt,
+            value: value,
+            unit_measure: !um ? 'ND' : um
+        }
+        
+        const txCreate = driver.Transaction.makeCreateTransaction(
+            assetdata, metadata,
+            [driver.Transaction.makeOutput(
+                driver.Transaction.makeEd25519Condition(publicKey))],
+            publicKey
+        )
 
-            console.log(metadata)
-
-            const createTx = driver.Transaction.makeCreateTransaction(
-                assetdata, metadata
-                [ driver.Transaction.makeOutput(
-                    driver.Transaction.makeEd25519Condition(publicKey))
-                ],
-                publicKey
-            );
-
-            const signedTx =  driver.Transaction.signTransaction(createTx, privateKey)
-            
-            connection.postTransactionCommit(signedTx).then(res => {
-                console.log("res: "+signedTx.id);
-               
-                resolve(res);
-            }).catch(err => {
-                reject(new Error(err));
-            })
-        });
+        const txSigned =  driver.Transaction.signTransaction(txCreate, privateKey)
+        
+        this.connection.postTransactionCommit(txSigned)
+        .then(res => {
+            console.log(txSigned.id)
+        })
     };
 
     /**
      * Update the asset using a TRANSFER transaction
      * 
-     * @param {*} transaction - The transaction to chain with the next (CreateTransaction or TransferTransaction)
+     * @param {*} txCreatedID - The transaction id to chain with the next (CreateTransaction or TransferTransaction)
      * @param {string} type - The action performed on the asset (e.g. processed with preservative).
      * @param {string} publicKey user public key
      * @param {string} privateKey user private key
      * @returns Return the posted transaction
      */
-    updateAsset(transaction, value, dt, um, publicKey, privateKey) {
+    updateAsset(txCreatedID, value, dt, um, publicKey, privateKey) {
 
-        return new Promise((resolve, reject) => {
+        const metadata = {
+            timestamp: dt,
+            value: value,
+            unit_measure: !um ? 'ND' : um
+        }
 
-            if(!um)
-                um = 'ND'
+        this.connection.getTransaction(txCreatedID)
+        .then((txCreated) => {
 
-            const Metadata = {
-                'value': value,
-                'timestamp': dt,
-                'unit_measure': um
-            } 
+            console.log(txCreated)
 
-            const updateAssetTransaction = driver.Transaction.makeTransferTransaction(
-                [{ tx: transaction, output_index: 0 }],
-                [driver.Transaction.makeOutput(driver.Transaction.makeEd25519Condition(publicKey))],
-                Metadata
+            const createTranfer = driver.Transaction.
+            makeTransferTransaction(
+                // The output index 0 is the one that is being spent
+                [{
+                    tx: txCreated,
+                    output_index: 0
+                }],
+                [driver.Transaction.makeOutput(
+                    driver.Transaction.makeEd25519Condition(
+                        publicKey))],
+                metadata
             )
-
-            const signedTransaction = driver.Transaction.signTransaction(updateAssetTransaction, privateKey);
-            
-            connection.postTransactionCommit(signedTransaction).then(postedTransaction => {
-                console.log("Transaction posted...");
-                resolve(postedTransaction);
-            }).catch(err => {
-                reject(err);
-            });
-        });
+            // Sign with the key of the owner of the painting (Alice)
+            const signedTransfer = driver.Transaction
+                .signTransaction(createTranfer, privateKey)
+            this.connection.postTransactionCommit(signedTransfer)
+            .then((res) => { console.log('Transaction posted')})
+        })
     }
 };
 

@@ -5,14 +5,12 @@ const config = require('../config/dev');
 const utils = require('./Utils'); 
 const http = require('./DriverHttpRequest')
 
-
-
 const host = config.ubuntu.host;
 const clientId = config.kafka.clientId;
 const brokers = [`${host}:9092`];
 const topic =  config.kafka.topic;
 
-const kafka = new Kafka({
+const kafka = new Kafka({   
     brokers: brokers,
     clientId: clientId
 })
@@ -24,6 +22,7 @@ const consumer = kafka.consumer({
 const consume = async () => {
     var currentUser = new utils.OwnerBlock(config.bigchaindb.userPublicKey, config.bigchaindb.userPrivateKey)
     console.log("...Starting consumer...");
+
     await consumer.connect();
 	await consumer.subscribe({ topic, fromBeginning: false })
 	await consumer.run({
@@ -33,26 +32,26 @@ const consume = async () => {
             var iotDevice = new driver.IotDevice();
           
             arrIotRowData.forEach(
-             async dt => {
+             dt => {
+                
+                http.GetAsset(dt.type).then(async (result) => {
 
-                 await http.GetAsset(dt.type).then(async (result) => {
                     if(result.length == 0)
                     {
                         console.log("CREATE asset..");
-                        await iotDevice.createAsset(dt.type, dt.unit, dt.value, dt.timestamp, currentUser.publicKey, currentUser.privateKey)
+                        iotDevice.createAsset(dt.type, dt.unit, dt.value, dt.timestamp, currentUser.publicKey, currentUser.privateKey)
                         .catch((err) => { console.error("...Error in CREATE asset...", err)});
                     }
                     else if(result.length > 0)
                     {
                         console.log("TRANSFER asset..");
+
                         http.GetAsset(dt.type)
                         .then((res) => {
-                            http.GetLastTransferTransaction(res.id)
-                            .then((transferTx) => {
-                                iotDevice.updateAsset(transferTx, dt.value, dt.timestamp, currentUser.publicKey, currentUser.privateKey);
-                                console.log(`${txPosted.id} successfully transfered!`)
-                            })
-                        }).catch((err) => { console.error("...Error in TRANSFER asset...", err)});
+                            var lastTx = res.pop().id;
+                            iotDevice.updateAsset(lastTx, dt.value, dt.timestamp, dt.um, currentUser.publicKey, currentUser.privateKey);
+                            
+                        }).catch((err) => {  console.error("...Error in GET LAST TRANSFER TX asset...", err)});
                     }else{
                         console.log("...Something wrong happened...");
                     }
