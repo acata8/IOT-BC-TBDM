@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "bigchaindb-driver": "^4.3.0",
+    "dotenv": "^16.0.3",
     "kafkajs": "^2.2.3"
   },
   "name": "iot-bc",
