@@ -1,7 +1,12 @@
 const { Kafka } = require('kafkajs')
+const env = require('dotenv')
 const driver = require('./Driver'); 
 const config = require('../config/dev');
-const env = require('dotenv')
+const utils = require('./Utils'); 
+const http = require('./DriverHttpRequest')
+
+
+
 const host = config.ubuntu.host;
 const clientId = config.kafka.clientId;
 const brokers = [`${host}:9092`];
@@ -15,75 +20,47 @@ const kafka = new Kafka({
 const consumer = kafka.consumer({ 
     groupId: clientId,
 })
-class IotRowData {
-    constructor(type, um , value, timestamp){
-        this.type = type,
-        this.um = um,
-        this.value = value,
-        this.timestamp = timestamp
-    }
-}
-
-class OwnerBlock {
-    constructor(publicKey, privateKey){
-        this.publicKey = publicKey,
-        this.privateKey = privateKey
-    }
-}
 
 const consume = async () => {
-    var currentUser = new OwnerBlock(process.env.USER_PUBLIC_KEY, process,env.USER_PRIVATE_KEY)
+    var currentUser = new utils.OwnerBlock(config.bigchaindb.userPublicKey, config.bigchaindb.userPrivateKey)
+    console.log("...Starting consumer...");
     await consumer.connect();
 	await consumer.subscribe({ topic, fromBeginning: false })
 	await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-            var arrIotRowData = new fromJson(message.value.toString())
+        eachMessage: async ({ message }) => {
+            var arrIotRowData = new utils.fromJson(message.value.toString())
             
+            var iotDevice = new driver.IotDevice();
+          
             arrIotRowData.forEach(
-             dt => {
-                 var iotDevice = new driver.IotDevice();
-                 iotDevice.connection.searchAssets(dt.type).then((result) => {
-                     if(result.length == 0)
-                     {
-                         console.log("CREATE asset..");
-                         
-                         iotDevice.createAsset(dt.type, dt.unit, dt.value, dt.timestamp, currentUser.publicKey, currentUser.privateKey)
-                         .then((txPosted) => {
-                             console.log(`${txPosted.id} successfully created`)
-                         });
-                     }
-                     else if(result.length > 0)
-                     {
-                         console.log("TRANSFER asset..");
-                         driver.connection.listTransactions(result[0].id, TransactionOperations.TRANSFER)
-                         .then((transferTx) => {
-                             var lastSignedTx = transferTx.pop();
-                             iotDevice.updateAsset(lastSignedTx, dt.value, dt.timestamp, currentUser.publicKey, currentUser.privateKey);
-                         });
-                     }else{
-                         console.log("...Something wrong happened...");
-                     }
-                 })
-             })
+             async dt => {
+
+                 await http.GetAsset(dt.type).then(async (result) => {
+                    if(result.length == 0)
+                    {
+                        console.log("CREATE asset..");
+                        await iotDevice.createAsset(dt.type, dt.unit, dt.value, dt.timestamp, currentUser.publicKey, currentUser.privateKey)
+                        .catch((err) => { console.error("...Error in CREATE asset...", err)});
+                    }
+                    else if(result.length > 0)
+                    {
+                        console.log("TRANSFER asset..");
+                        http.GetAsset(dt.type)
+                        .then((res) => {
+                            http.GetLastTransferTransaction(res.id)
+                            .then((transferTx) => {
+                                iotDevice.updateAsset(transferTx, dt.value, dt.timestamp, currentUser.publicKey, currentUser.privateKey);
+                                console.log(`${txPosted.id} successfully transfered!`)
+                            })
+                        }).catch((err) => { console.error("...Error in TRANSFER asset...", err)});
+                    }else{
+                        console.log("...Something wrong happened...");
+                    }
+                }).catch((err) => { console.error("...Error in Bigchaindb...", err)})
+            })
         },
     })
 }
 
-consume().catch((err) => { console.log("...error in consuming...")})
-
-/**
-* Convert generic json object to IotRowData object
-* @param {Json} jsonObject JsonObject retrieved from each consume row
-* @returns Array of IotRowData 
-*/
-function fromJson(jsonObject){
-
-    var PulledData = []
- 
-    var obj = JSON.parse(jsonObject);
-    var arr = obj.m;
- 
-    arr.forEach(element => PulledData.push(new IotRowData(element.u, element.v, element.k, element.tz)));
-    return PulledData;
- };
+module.exports = consume;
 

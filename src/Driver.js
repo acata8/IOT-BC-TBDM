@@ -1,23 +1,18 @@
 const driver = require('bigchaindb-driver');
-
 const config = require('../config/dev');
-const host = config.ubuntu.host;
 
-const API_PATH = `${host}:9984/api/v1/`;
+const API_PATH = `http://${config.bigchaindb.apiPath}`;
+
+const connection = new driver.Connection(API_PATH);
 
 class IotDevice {
 
-    constructor() {
-        // Initialise a new connection.
-        this.connection = new driver.Connection(API_PATH);
-    }
-    
     /**
      * Method used to create a new asset inside BigchainDB
      * @param {string} type Iot device type
-     * @param {string} um unit meauser
-     * @param {number} value current value
-     * @param {date} dt current datetime
+     * @param {*} um unit meauser
+     * @param {*} value current value
+     * @param {*} dt current datetime
      * @param {string} publicKey user public key
      * @param {string} privateKey user private key
      * @returns posted transaction
@@ -25,29 +20,38 @@ class IotDevice {
     createAsset(type, um, value, dt, publicKey, privateKey) {
     
         return new Promise((resolve, reject) => {
-    
-            const Assetdata = {
-                "type": type,
-                "unit_measure": um
-            } 
             
-            const Metadata = {
-                "value": value,
-                "timestamp": dt
-            } 
+            const assetdata = {
+                'iot_device': {
+                    'type': type
+                }
+            }
+            
+            if(!um)
+                um = 'ND'
+
+            const metadata = {
+                'value': value,
+                'timestamp': dt,
+                'unit_measure': um
+            }
+
+            console.log(metadata)
 
             const createTx = driver.Transaction.makeCreateTransaction(
-                assetData,
-                metaData,
-                [driver.Transaction.makeOutput(
-                    driver.Transaction.makeEd25519Condition(publicKey))],
+                assetdata, metadata
+                [ driver.Transaction.makeOutput(
+                    driver.Transaction.makeEd25519Condition(publicKey))
+                ],
                 publicKey
             );
-    
-            const signedTransaction = driver.Transaction.signTransaction(createTx, privateKey);
 
-            this.connection.postTransactionCommit(signedTransaction).then(postedTransaction => {
-                resolve(postedTransaction);
+            const signedTx =  driver.Transaction.signTransaction(createTx, privateKey)
+            
+            connection.postTransactionCommit(signedTx).then(res => {
+                console.log("res: "+signedTx.id);
+               
+                resolve(res);
             }).catch(err => {
                 reject(new Error(err));
             })
@@ -63,13 +67,17 @@ class IotDevice {
      * @param {string} privateKey user private key
      * @returns Return the posted transaction
      */
-    updateAsset(transaction, value, dt, publicKey, privateKey) {
+    updateAsset(transaction, value, dt, um, publicKey, privateKey) {
 
         return new Promise((resolve, reject) => {
 
+            if(!um)
+                um = 'ND'
+
             const Metadata = {
-                "value": value,
-                "timestamp": dt
+                'value': value,
+                'timestamp': dt,
+                'unit_measure': um
             } 
 
             const updateAssetTransaction = driver.Transaction.makeTransferTransaction(
@@ -79,11 +87,10 @@ class IotDevice {
             )
 
             const signedTransaction = driver.Transaction.signTransaction(updateAssetTransaction, privateKey);
-
-            console.log("Posting transaction.");
-            this.connection.postTransactionCommit(signedTransaction).then(postedTransaction => {
+            
+            connection.postTransactionCommit(signedTransaction).then(postedTransaction => {
+                console.log("Transaction posted...");
                 resolve(postedTransaction);
-
             }).catch(err => {
                 reject(err);
             });
@@ -92,5 +99,6 @@ class IotDevice {
 };
 
 module.exports = {
-    IotDevice
+    IotDevice,
+    API_PATH
 }
