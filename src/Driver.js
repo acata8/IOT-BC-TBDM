@@ -1,98 +1,127 @@
 const driver = require('bigchaindb-driver');
 const config = require('../config/dev');
+const http = require('./DriverHttpRequest');
+const { IotRowData } = require('./Utils');
 
-const API_PATH = `http://${config.bigchaindb.apiPath}`;
 
-
-class IotDevice {
+class BlockchainHandler {
 
     constructor(){
-        this.connection = new driver.Connection(API_PATH);
+        this.connection = new driver.Connection(config.bigchaindb.httpApiPath);
+        this.publicKey = config.bigchaindb.userPublicKey;
+        this.privateKey = config.bigchaindb.userPrivateKey
     }
 
-
-
     /**
-     * Method used to create a new asset inside BigchainDB
+     * Create a new asset inside server
      * @param {string} type Iot device type
      * @param {*} um unit meauser
      * @param {*} value current value
-     * @param {*} dt current datetime
-     * @param {string} publicKey user public key
-     * @param {string} privateKey user private key
+     * @param {*} timestamp current datetime
      * @returns posted transaction
      */
-    createAsset(type, um, value, dt, publicKey, privateKey) {
+    async createAsset(type, um, value, timestamp) {
     
+        if(!value)
+            return;
+
         const assetdata = {
             iot_device : type
         }
 
         const metadata = {
-            timestamp: dt,
+            timestamp: !timestamp ? Date.UTC.now() : timestamp,
             value: value,
             unit_measure: !um ? 'ND' : um
         }
-        
+
         const txCreate = driver.Transaction.makeCreateTransaction(
             assetdata, metadata,
             [driver.Transaction.makeOutput(
-                driver.Transaction.makeEd25519Condition(publicKey))],
-            publicKey
+                driver.Transaction.makeEd25519Condition(this.publicKey))],
+            this.publicKey
         )
 
-        const txSigned =  driver.Transaction.signTransaction(txCreate, privateKey)
+        const txSigned =  driver.Transaction.signTransaction(txCreate, this.privateKey)
         
         this.connection.postTransactionCommit(txSigned)
         .then(res => {
-            console.log(txSigned.id)
-        })
+            console.log(`[CREATE TX] Transaction ${txSigned.id} added`);
+    })  .catch((err) => {console.log('>>> [TRANSFER TX] Invalid commit transaction')})
     };
 
     /**
      * Update the asset using a TRANSFER transaction
-     * 
      * @param {*} txCreatedID - The transaction id to chain with the next (CreateTransaction or TransferTransaction)
-     * @param {string} type - The action performed on the asset (e.g. processed with preservative).
-     * @param {string} publicKey user public key
-     * @param {string} privateKey user private key
+     * @param {string} type - The action performed on the asset 
      * @returns Return the posted transaction
      */
-    updateAsset(txCreatedID, value, dt, um, publicKey, privateKey) {
+    async updateAsset(txCreatedID, value, timestamp, um) {
+
+        if(!value)
+            return;
 
         const metadata = {
-            timestamp: dt,
+            timestamp: !timestamp ? Date.UTC.now() : timestamp,
             value: value,
             unit_measure: !um ? 'ND' : um
         }
 
         this.connection.getTransaction(txCreatedID)
         .then((txCreated) => {
-
-            console.log(txCreated)
-
-            const createTranfer = driver.Transaction.
+            const txTransfer = driver.Transaction.
             makeTransferTransaction(
-                // The output index 0 is the one that is being spent
                 [{
                     tx: txCreated,
                     output_index: 0
                 }],
                 [driver.Transaction.makeOutput(
-                    driver.Transaction.makeEd25519Condition(
-                        publicKey))],
+                    driver.Transaction.makeEd25519Condition(this.publicKey))],
                 metadata
             )
-            // Sign with the key of the owner of the painting (Alice)
-            const signedTransfer = driver.Transaction
-                .signTransaction(createTranfer, privateKey)
-            this.connection.postTransactionCommit(signedTransfer)
-            .then((res) => { console.log('Transaction posted')})
+
+            const txSigned = driver.Transaction
+                .signTransaction(txTransfer, this.privateKey);
+
+            this.connection.postTransactionCommit(txSigned)
+            .then((res) => {  console.log(`[TRANSFER TX] Transaction ${txSigned.id} transfered`);})
+            .catch((err) => {console.log('>>> [TRANSFER TX] Invalid commit transaction')})
+        }).catch((err) => {
+            console.log('>>> [TRANSFER TX] Cannot retrieve transaction')
         })
+    }
+
+    /**
+     * Assess whether to CREATE the asset or TRANSFER to update the metadata
+     * @param {IotRowData} iotMessage - object to post inside server
+     */
+    async createOrTransferAsset(iotMessage){
+        this.connection.searchAssets(iotMessage.type)
+        .then((result) => {
+            if(result.length == 0)
+            {
+                console.log("[CREATE TX] Action pending");
+                this.createAsset(iotMessage.type, iotMessage.unit, iotMessage.value, iotMessage.timestamp)
+                .catch((err) => { console.error(">>> [CREATE TX]", err)});
+            }
+            else if(result.length > 0)
+            {
+                console.log("[TRANSFER TX] Action pending");
+
+                http.GetLastAssetTransaction(iotMessage.type)
+                .then((res) => {
+                    var lastTxId = res.pop().id;
+    
+                    this.updateAsset(lastTxId, iotMessage.value, iotMessage.timestamp, iotMessage.um)
+                        .catch((err) => { console.error(">>> [TRANSFER TX]", err)});
+                    
+                }).catch((err) => {  console.error(">>> [RETRIEVE TX]", err)});
+            }
+        }).catch((err) => { console.error(">>> [BIGCHAINDB]", err)})
     }
 };
 
+
 module.exports = {
-    IotDevice,
-    API_PATH
+    BlockchainHandler
 }

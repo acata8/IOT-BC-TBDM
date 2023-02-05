@@ -1,5 +1,5 @@
 
 const consume = require('./src/Consumer')
 
-consume().catch((err) => { console.error("...Error in consuming...", err)})
+consume().catch((err) => {  console.log(">>> [CREATE TX]", err);})
 
