@@ -1,5 +1,5 @@
 const driver = require('bigchaindb-driver');
-const config = require('../config/dev');
+const config = require('config');
 const http = require('./DriverHttpRequest');
 const { IotRowData } = require('./Utils');
 
@@ -7,9 +7,9 @@ const { IotRowData } = require('./Utils');
 class BlockchainHandler {
 
     constructor(){
-        this.connection = new driver.Connection(config.bigchaindb.httpApiPath);
-        this.publicKey = config.bigchaindb.userPublicKey;
-        this.privateKey = config.bigchaindb.userPrivateKey
+        this.connection = new driver.Connection(config.get("bigchaindb.httpApiPath"));
+        this.publicKey = config.get("bigchaindb.userPublicKey");
+        this.privateKey = config.get("bigchaindb.userPrivateKey");
     }
 
     /**

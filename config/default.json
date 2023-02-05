@@ -1,0 +1,15 @@
+{
+    "ubuntu": {
+        "host": "192.168.1.116"
+    },
+    "kafka": {
+        "clientId": "test-consumer-group",
+        "topics": ["Topic1"]
+    },
+    "bigchaindb": {
+        "httpApiPath": "http://192.168.1.130:9984/api/v1/",
+        "userPrivateKey":"H5u66H6rn2V4RdQocABGmQH7NHMXZSBAe47DcqHjuRhY",
+        "userPublicKey": "8sVFshXJ8ZM9iKtN94sdrXqpoFW3SVsH3Zg5HeEsgtMX"
+    }
+    
+}

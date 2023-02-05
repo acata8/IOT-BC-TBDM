@@ -13,6 +13,7 @@
 
 .env
 .genv
+dev.js
 
 node_modules
 dist

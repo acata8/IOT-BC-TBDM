@@ -1,6 +1,6 @@
 
 const axios = require('axios');
-const config = require('../config/dev');
+const config = require('config');
 
 /**
  * Search all assets that match a given text search. 
@@ -10,7 +10,7 @@ const config = require('../config/dev');
 function GetAsset(assetName) {
     return new Promise((resolve, reject) => {
 
-        var path = `${config.bigchaindb.httpApiPath}assets?search=${assetName}`;
+        var path = `${config.get("bigchaindb.httpApiPath")}assets?search=${assetName}`;
         axios.get(path)
         .then(res => {
             resolve(res.data);
@@ -29,7 +29,7 @@ function GetLastAssetTransaction(assetName) {
     return new Promise((resolve, reject) => {
         
         GetAsset(assetName).then((res) => { 
-            var path = `${config.bigchaindb.httpApiPath}transactions?asset_id=${res.pop().id}&last_tx=true`;
+            var path = `${config.get("bigchaindb.httpApiPath")}transactions?asset_id=${res.pop().id}&last_tx=true`;
             axios.get(path)
             .then(res => {
                 resolve(res.data);
