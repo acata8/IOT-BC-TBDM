@@ -1,6 +1,6 @@
 # IoT-BC
 
-**The objective of the project is to define a prototype tool to store IoT data on a blockchain database based on BlockchainDB [https://www.bigchaindb.com/](https://www.bigchaindb.com/).**
+**The objective of the project is to define a prototype tool to store IoT data on a blockchain database based on BlockchainDB [https://www.bigchaindb.com/](https://www.bigchaindb.com/).** \n
 **In order to guarantee scalability and performance, the tool must also consider an additional message broker component based on Apache Kafka [https://kafka.apache.org/](https://kafka.apache.org/) for reading IoT messages.**
 ![alt text](https://github.com/acata8/IOT-BC-TBDM/blob/main/ProfSchema.jpg)
 
