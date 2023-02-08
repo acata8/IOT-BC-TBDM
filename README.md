@@ -2,6 +2,7 @@
 
 **The objective of the project is to define a prototype tool to store IoT data on a blockchain database based on BlockchainDB [https://www.bigchaindb.com/](https://www.bigchaindb.com/).**
 **In order to guarantee scalability and performance, the tool must also consider an additional message broker component based on Apache Kafka [https://kafka.apache.org/](https://kafka.apache.org/) for reading IoT messages.**
+![alt text](https://github.com/acata8/IOT-BC-TBDM/blob/main/ProfSchema.jpg)
 
 
 # Prerequisites
@@ -33,7 +34,6 @@ The file explorer is accessible using the button in left corner of the navigatio
   ```bash
   confluent-hub install confluentinc/kafka-connect-mqtt:latest
   ```
-![alt text](https://github.com/acata8/IOT-BC-TBDM/blob/main/ProfSchema.jpg)
 ## Authors
 
 * **Andrea Cataluffi** - [acata8](https://github.com/acata8)
