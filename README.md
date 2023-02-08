@@ -33,7 +33,7 @@ The file explorer is accessible using the button in left corner of the navigatio
   ```bash
   confluent-hub install confluentinc/kafka-connect-mqtt:latest
   ```
-![alt text](http://url/to/img.png)
+![alt text](https://github.com/acata8/IOT-BC-TBDM/blob/main/ProfSchema.jpg)
 ## Authors
 
 * **Andrea Cataluffi** - [acata8](https://github.com/acata8)
