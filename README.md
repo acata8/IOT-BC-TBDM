@@ -33,12 +33,7 @@ The file explorer is accessible using the button in left corner of the navigatio
   ```bash
   confluent-hub install confluentinc/kafka-connect-mqtt:latest
   ```
-* Add source and sink connector
-  <br><br>
-  <img src="images/confluent-connectors.png" width="800" height="450">
-  <br><br>
-* Create and Write to a Stream and Table using KSQL
-
+![alt text](http://url/to/img.png)
 ## Authors
 
 * **Andrea Cataluffi** - [acata8](https://github.com/acata8)
