@@ -4,6 +4,8 @@
 
 **In order to guarantee scalability and performance, the tool must also consider an additional message broker component based on Apache Kafka [https://kafka.apache.org/](https://kafka.apache.org/) for reading IoT messages.**
 
+The green part is provided by the professor
+
 ![alt text](https://github.com/acata8/IOT-BC-TBDM/blob/main/ProfSchema.jpg)
 
 
