@@ -1,5 +1,5 @@
 
-const consume = require('./src/Consumer')
+const consume = require('./src/Kafka')
 
-consume().catch((err) => {  console.log(">>> [CREATE TX]", err);})
+consume().catch((err) => {  console.log(">>> [STARTING KAFKA]", err);})
 

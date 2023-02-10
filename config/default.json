@@ -4,7 +4,8 @@
     },
     "kafka": {
         "clientId": "test-consumer-group",
-        "topics": ["Topic1"]
+        "topics": ["Topic1"],
+        "ACKTopic": "TopicACK"
     },
     "bigchaindb": {
         "httpApiPath": "http://192.168.1.132:9984/api/v1/",

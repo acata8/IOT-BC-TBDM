@@ -42,12 +42,16 @@ class BlockchainHandler {
             this.publicKey
         )
 
-        const txSigned =  driver.Transaction.signTransaction(txCreate, this.privateKey)
+        const txSigned = driver.Transaction.signTransaction(txCreate, this.privateKey)
         
-        this.connection.postTransactionCommit(txSigned)
-        .then(res => {
-            console.log(`[CREATE TX] Transaction ${txSigned.id} added`);
-    })  .catch((err) => {console.log('>>> [TRANSFER TX] Invalid commit transaction')})
+        var postedTx = await this.connection.postTransactionCommit(txSigned)
+
+        if(postedTx){
+            console.log(`[CREATE TX] Transaction ${txSigned.id} transfered`);
+            return txSigned.id;
+        }else{
+            console.log('>>> [CREATE TX] Invalid transaction')
+        }
     };
 
     /**
@@ -67,12 +71,14 @@ class BlockchainHandler {
             unit_measure: !um ? 'ND' : um
         }
 
-        this.connection.getTransaction(txCreatedID)
-        .then((txCreated) => {
+        var getTx = await this.connection.getTransaction(txCreatedID);
+
+        if(getTx){
+
             const txTransfer = driver.Transaction.
             makeTransferTransaction(
                 [{
-                    tx: txCreated,
+                    tx: getTx,
                     output_index: 0
                 }],
                 [driver.Transaction.makeOutput(
@@ -83,12 +89,17 @@ class BlockchainHandler {
             const txSigned = driver.Transaction
                 .signTransaction(txTransfer, this.privateKey);
 
-            this.connection.postTransactionCommit(txSigned)
-            .then((res) => {  console.log(`[TRANSFER TX] Transaction ${txSigned.id} transfered`);})
-            .catch((err) => {console.log('>>> [TRANSFER TX] Invalid commit transaction')})
-        }).catch((err) => {
-            console.log('>>> [TRANSFER TX] Cannot retrieve transaction')
-        })
+            var postedTx = await this.connection.postTransactionCommit(txSigned)
+
+            if(postedTx){
+                console.log(`[TRANSFER TX] Transaction ${txSigned.id} transfered`);
+                return txSigned.id;
+            }else{
+                console.log('>>> [TRANSFER TX] Invalid transaction')
+            }
+        }else{
+            console.log('>>> [BIGCHAINDB] Cannot get current transaction ')
+        }
     }
 
     /**
@@ -96,28 +107,55 @@ class BlockchainHandler {
      * @param {IotRowData} iotMessage - object to post inside server
      */
     async createOrTransferAsset(iotMessage){
-        this.connection.searchAssets(iotMessage.type)
-        .then((result) => {
-            if(result.length == 0)
-            {
-                console.log("[CREATE TX] Action pending");
-                this.createAsset(iotMessage.type, iotMessage.unit, iotMessage.value, iotMessage.timestamp)
-                .catch((err) => { console.error(">>> [CREATE TX]", err)});
-            }
-            else if(result.length > 0)
-            {
-                console.log("[TRANSFER TX] Action pending");
+        
+        try{
 
-                http.GetLastAssetTransaction(iotMessage.type)
-                .then((res) => {
-                    var lastTxId = res.pop().id;
-    
-                    this.updateAsset(lastTxId, iotMessage.value, iotMessage.timestamp, iotMessage.um)
-                        .catch((err) => { console.error(">>> [TRANSFER TX]", err)});
-                    
-                }).catch((err) => {  console.error(">>> [RETRIEVE TX]", err)});
+        
+            var Assets = await this.connection.searchAssets(iotMessage.type);
+            if(Assets){
+
+                if(Assets.length == 0)
+                {
+                    console.log("[CREATE TX] Action pending");
+
+                    var createdTx = await this.createAsset(iotMessage.type, iotMessage.um, iotMessage.value, iotMessage.timestamp);
+
+                    if(createdTx){
+                        return createdTx;
+                    }else{
+                        console.error(">>> [CREATE TX]", err)
+                    }
+
+                }
+                else if(Assets.length > 0)
+                {
+                    console.log("[TRANSFER TX] Action pending");
+
+                    var LastTx = await http.GetLastAssetTransaction(iotMessage.type);
+
+                    if(LastTx){
+                        var lastTxId = LastTx.pop().id;
+
+                        var updatedTx = await this.updateAsset(lastTxId, iotMessage.value, iotMessage.timestamp, iotMessage.um);
+
+                        if(updatedTx){
+                            return updatedTx;
+                        }else{ 
+                            console.error(">>> [TRANSFER TX]", err)
+                        };
+
+                    }else{
+                        console.error(">>> [RETRIEVE TX]", err);
+                    }
+                }else{
+                    console.error(">>> [BIGCHAINDB] No result ", err);
+                }
+            } else{
+                console.error(">>> [BIGCHAINDB]", err);
             }
-        }).catch((err) => { console.error(">>> [BIGCHAINDB]", err)})
+        } catch (error) {
+            console.error(">>> [Error]", error);
+        }
     }
 };
 
