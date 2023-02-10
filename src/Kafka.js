@@ -8,7 +8,7 @@ const host = config.get('ubuntu.host');
 const clientId = config.get("kafka.clientId");
 const brokers = [`${host}:9092`];
 const topics =  config.get("kafka.topics");
-// const ACKTopic =  config.get("kafka.ACKTopic");
+const ACKTopic =  config.get("kafka.ACKTopic");
 
 const kafka = new Kafka({  
     logLevel: logLevel.WARN, 
@@ -65,11 +65,11 @@ const sendMessage = (txId, asset, um, value, ts) => {
 
     return producer
       .send({
-        topic: 'TopicACK',
+        topic: ACKTopic,
         messages: Array(createMessage(txId,message))
       })
       .then(
-        console.log(message)
+        console.log(`PRODUCER SEND ${message} TO ${ACKTopic}`)
       )
       .catch(e => console.error(`[PRODUCER]`, e))
   }

@@ -154,7 +154,7 @@ class BlockchainHandler {
                 console.error(">>> [BIGCHAINDB]", err);
             }
         } catch (error) {
-            console.error(">>> [Error]", error);
+            console.error(">>> Connection to BIGCHAIN is not estabilished... Trying to connect...", );
         }
     }
 };
