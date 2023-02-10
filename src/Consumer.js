@@ -1,4 +1,4 @@
-const { Kafka } = require('kafkajs')
+const { Kafka, logLevel } = require('kafkajs')
 const driver = require('./Driver'); 
 const utils = require('./Utils'); 
 const config = require('config');
@@ -9,7 +9,8 @@ const clientId = config.get("kafka.clientId");
 const brokers = [`${host}:9092`];
 const topics =  config.get("kafka.topics");
 
-const kafka = new Kafka({   
+const kafka = new Kafka({  
+    logLevel: logLevel.WARN, 
     brokers: brokers,
     clientId: clientId
 })
