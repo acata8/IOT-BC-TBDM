@@ -18,6 +18,21 @@ The green part is the previous part that connects to the prototype. It was not d
 
 In the [default.json](https://github.com/acata8/IOT-BC-TBDM/blob/main/config/default.json)  configuration file you can set different parameters in order to activate the prototype in a configurable way.
 
+A properly formatted example for expected format to be consumed
+```
+{
+  "m": [
+    {
+      "t": "nowTimestamp()",
+      "tz": "now()",
+      "k": "device_temperature",
+      "v": "double(0, 40)",
+      "u": "C"
+    }
+}
+```
+
+
 ## Usage
 ### Run
 The fastes way to run the simulator is to use Docker.
