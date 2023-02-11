@@ -9,6 +9,11 @@ The green part is provided by the professor
 ![alt text](https://github.com/acata8/IOT-BC-TBDM/blob/main/utils/img/ProfSchema.jpg)
 
 
+#Running IOT-BC Prototype
+
+The fastes way to run the simulator is to use Docker.
+``` docker-compose up ```
+
 # Prerequisites
 
 StackEdit stores your files in your browser, which means all your files are automatically saved locally and are accessible **offline!**
