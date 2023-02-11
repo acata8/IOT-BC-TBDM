@@ -6,7 +6,7 @@
 
 The green part is provided by the professor
 
-![alt text](https://github.com/acata8/IOT-BC-TBDM/blob/main/ProfSchema.jpg)
+![alt text](https://github.com/acata8/IOT-BC-TBDM/blob/main/utils/img/ProfSchema.jpg)
 
 
 # Prerequisites
