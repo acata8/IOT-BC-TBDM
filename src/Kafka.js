@@ -5,8 +5,9 @@ const config = require('config');
 
 
 const host = config.get('ubuntu.host');
+const brokerport = config.get('ubuntu.brokerport');
 const clientId = config.get("kafka.clientId");
-const brokers = [`${host}:9092`];
+const brokers = [`${host}:${brokerport}`];
 const topics =  config.get("kafka.topics");
 const ACKTopic =  config.get("kafka.ACKTopic");
 

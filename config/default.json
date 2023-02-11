@@ -4,6 +4,7 @@
     },
     "kafka": {
         "clientId": "test-consumer-group",
+        "brokerport": "9092",
         "topics": ["Topic1"],
         "ACKTopic": "TopicACK"
     },
