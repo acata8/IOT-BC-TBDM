@@ -1,34 +1,35 @@
-# IoT-BC
+# IoT#BC
 
-**The objective of the project is to define a prototype tool to store IoT data on a blockchain database based on BlockchainDB [https://www.bigchaindb.com/](https://www.bigchaindb.com/).** 
+**The aim of the project is to define a prototype tool to store IoT data on a blockchain database based on  [BlockchainDB](https://www.bigchaindb.com/).** 
 
-**In order to guarantee scalability and performance, the tool must also consider an additional message broker component based on Apache Kafka [https://kafka.apache.org/](https://kafka.apache.org/) for reading IoT messages.**
+**In order to guarantee scalability and performance, the tool must also consider an additional message broker component based on [Apache Kafka](https://kafka.apache.org/) for reading  [IoT messages](https://github.com/massimocallisto/iot-simulator).**
 
-The green part is provided by the professor
+The developed project takes charge of the goal of receiving a series of data in real-time from Apache Kafka and store them.
+To develop the services to receive and send data to Apache Kafka has been used the [KafkaJs](https://github.com/tulios/kafkajs) library.
+The [js-bigchaindb-driver](https://github.com/bigchaindb/js-bigchaindb-driver) was used to store blocks in Bigchain.
 
-![alt text](https://github.com/acata8/IOT-BC-TBDM/blob/main/utils/img/ProfSchema.jpg)
+The main idea was to use a basic user who is responsible for owning every asset that is created.
+This is because the project does not require the transfer of assets between two or more proprietary users but only the storage of data and keep track of changes in the value of the data of an asset.
+For demonstration purposes public and private user keys are stored in the configuration file.
 
+The green part is the previous part that connects to the prototype. It was not developed in the current project.
+![Project schema](https://github.com/acata8/IOT-BC-TBDM/blob/main/utils/img/ProfSchema.jpg)
+## Configuration
 
-#Running IOT-BC Prototype
-
-The fastes way to run the simulator is to use Docker.
-``` docker-compose up ```
-
-# Prerequisites
-
-StackEdit stores your files in your browser, which means all your files are automatically saved locally and are accessible **offline!**
-
-## Installation
-
-The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
-
+In the [default.json](https://github.com/acata8/IOT-BC-TBDM/blob/main/config/default.json)  configuration file you can set different parameters in order to activate the prototype in a configurable way.
 
 ## Usage
-
-* Install source and sink connectors you need with the command
+### Run
+The fastes way to run the simulator is to use Docker.
   ```bash
-  confluent-hub install confluentinc/kafka-connect-mqtt:latest
+    docker-compose up 
   ```
+### Stop
+To stop the simulator using docker
+  ```bash
+    docker-compose down
+  ```
+  
 ## Authors
 
 * **Andrea Cataluffi** - [acata8](https://github.com/acata8)
