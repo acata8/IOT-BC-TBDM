@@ -149,6 +149,7 @@ A BigchainDD Node is identified by:
 - Tendermint *node_id*
 
 The Tendermint *pub_key.value* is stored in the file ```$HOME/.tendermint/config/priv_validator.json```. That file should look like:
+```bash
 {
   "address": "E22D4340E5A92E4A9AD7C62DA62888929B3921E9",
   "pub_key": {
@@ -163,6 +164,7 @@ The Tendermint *pub_key.value* is stored in the file ```$HOME/.tendermint/config
     "value": "AHBiZXdZhkVZoPUAiMzClxhl0VvUp7Xl3YT6GvCc93A/5rB4fvceKLxHIKY1ZvA+xr2jiKercj7R9J+mtWRlrQ=="
   }
 }
+```
 
 To get your Tendermint node_id, run the command:
 ```
