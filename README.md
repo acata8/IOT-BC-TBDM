@@ -225,7 +225,7 @@ At this point the Coordinator should has received the data from all the Members,
             "type":"tendermint/PubKeyEd25519",
             "value":"<Member 1 public key>"
          },
-         "power":10,
+         "power": "10",
          "name":"<Member 1 name>"
       },
       {
@@ -236,7 +236,7 @@ At this point the Coordinator should has received the data from all the Members,
             "type":"tendermint/PubKeyEd25519",
             "value":"<Member N public key>"
          },
-         "power":10,
+         "power":"10",
          "name":"<Member N name>"
       }
    ],
