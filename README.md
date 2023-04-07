@@ -15,6 +15,8 @@ For demonstration purposes public and private user keys are stored in the config
 The green part is the previous part that connects to the prototype. It was not developed in the current project.
 ![Project schema](https://github.com/acata8/IOT-BC-TBDM/blob/main/utils/img/ProfSchema.jpg)
 
+[BIGCHAINDB EXPORT NODES](https://drive.google.com/drive/u/1/folders/1DXq_tf4nXs5l0d1VF6MZjqfCYlu4SEzp)
+
 # Prototype
 ## Configuration
 
