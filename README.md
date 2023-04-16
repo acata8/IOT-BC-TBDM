@@ -17,6 +17,12 @@ The green part is the previous part that connects to the prototype. It was not d
 
 [BIGCHAINDB EXPORT NODES](https://drive.google.com/drive/folders/103M1VBqBnYJNHOH8uPjk3SupAxCAdodB?usp=share_link)
 
+# BIGCHAINDB CURRENT ISSUE ON NODES
+
+[ENDPOINT ISSUE](https://github.com/bigchaindb/bigchaindb/issues/2747)
+
+
+
 # Prototype
 ## Configuration
 
